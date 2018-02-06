@@ -1,0 +1,87 @@
+<div class="star-rating">
+  {{#_stars:i}}
+    <i class="fa {{error ? 'is-shaking' : ''}} {{i+1 <= value ? 'fa-star' : 'fa-star-o'}}" value={{i}} aria-hidden="true" on-tap="setRating(i+1)"></i>
+  {{/}}
+  {{#doing}}
+    <i class="fa fa-refresh fa-spin is-small"></i>
+  {{/}}
+  {{#done}}
+    <i class="fa fa-check is-small"></i>
+  {{/}}
+</div>
+
+<style>
+  .fa-star {
+    color:#f0d306;
+  }
+  .fa-check {
+    color: green;
+  }
+  .fa-star, .fa-star-o {
+    cursor: pointer;
+  }
+  .small {
+    font-size: 1em;
+  }
+</style>
+
+<script>
+  component.exports = {
+    data: function() {
+      return {
+        stars: 5,
+        error: false,
+        doing: false,
+        readonly: false,
+        size: 'large',
+        _prev_value: 0,
+        value: 0
+      }
+    },
+    computed: {
+      _stars: function () {
+        return Array(this.get('stars'));
+      }
+    },
+    setRating: function(index) {
+      var self = this;
+      self.set({
+        '_prev_value': self.get('value'),
+        'done': false,
+        'doing': true,
+        'error': false
+      }).then(function(){
+        self.animate('value', index, {duration:100});
+        self.fire('rated', self);
+      });
+    },
+    error: function(){
+      var self = this;
+      var _prev_value = self.get('_prev_value');
+      self.set({
+        'doing': false,
+        'done': false,
+        'error': true
+      }).then(function(){
+        setTimeout(function(){
+          self.set({
+            'error': false,
+            'value': _prev_value
+          });
+        }, 500)
+      });
+    },
+    done: function() {
+      var self = this;
+      self.set({
+        'doing': false,
+        'done': true,
+        'error': false
+      }).then(function(){
+        setTimeout(function(){
+          self.set('done', false);
+        }, 3000);
+      });
+    }
+  };
+</script>
